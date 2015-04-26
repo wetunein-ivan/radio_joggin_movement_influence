@@ -1,0 +1,107 @@
+<html>
+    <head>
+    </head>
+<script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/1.8/jquery.min.js"></script>
+<script>
+
+var data = 1;
+
+var playedTracks = [];
+var scoredTracks = [];
+var radioState = {};
+
+function simplify(t) {
+
+	return {id:t.id, title:t.title, album_title:t.album.title, artist_name:t.artist.title, url:t.music_url, art:t.image_url};
+}
+
+function MyUpdate() {
+	$('#played').html("<li>SCORED:" + JSON.stringify(scoredTracks,null,4) + 
+			  "<li>PLAYED:" + JSON.stringify(playedTracks,null,4));
+
+	$('#main').html("SENSORS:" + JSON.stringify(radioState,null,4));
+
+
+}
+
+function OpenRadio_UserDidScoreTrack(payload) {
+	scoredTracks.push(payload);
+	MyUpdate();
+}
+function OpenRadio_UserDidPlayTrack(payload) {
+	playedTracks.push(payload);
+	MyUpdate();
+}
+
+function OpenRadio_GetNextTracks(state) {
+	radioState = state;
+	MyUpdate();
+var qs = 1;
+if (state.queueSize==0) qs = 2;
+
+
+
+var postData = {
+    "queries": [
+        {
+            "enabled": true,
+            "ref": "ref1",
+            "type": "track",
+            "body": {
+                "size": qs,
+
+                "query": {
+                    "function_score": { "random_score": {}, "query": {
+                    "bool": {
+                        "must": [
+                            {
+                                "term": {
+                                    "analysis.color.top_0": "red"
+                                }
+                            },
+                            {
+                                "term": {
+                                    "analysis.genre_cloud.top": "Jazz"
+                                }
+                            }
+                        ]
+                    }
+                }
+            }
+                }
+            }
+        }
+    ]
+};
+
+
+
+$.ajax({
+  url:"https://openradio.tunehog.com/music-catalog/_search",
+  type:"POST",
+  data:JSON.stringify(postData),
+  contentType:"application/json; charset=utf-8",
+  dataType:"json",
+  success: function(data){
+	var tracks = [];
+	var h = data.results[0].hits;
+	for(var i=0;i<h.length;i++) {
+		tracks.push(simplify(h[i]));
+	}
+        var ans = { status : 'success',  tracks: tracks};                                                                                                           
+	if (window.webkit) {
+        window.webkit.messageHandlers.buttonClicked.postMessage(ans);  
+	} else { console.log(JSON.stringify(ans)); }
+  }
+})
+
+    
+}
+
+///getNextTrack();
+</script>
+<body>
+<h1><div id="played"></div> </h1>
+<h1><div id="main">TEXTO ORIGINAL</div> </h1>
+</body>
+</html>
