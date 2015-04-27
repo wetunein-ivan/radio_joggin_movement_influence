@@ -8,5 +8,5 @@
     {
       "name":"JSM",
       "company":"RR Music"
-    },
+    }
 }
