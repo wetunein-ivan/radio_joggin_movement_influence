@@ -1,107 +1,111 @@
 <html>
-    <head>
-    </head>
 <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/1.8/jquery.min.js"></script>
+<script type="text/javascript" src="https://openradio.tunehog.com/apps/openradio.js"></script>
 <script>
 
-var data = 1;
-
+var pendingTracks = [];
+var influenceTracks = [];
 var playedTracks = [];
 var scoredTracks = [];
 var radioState = {};
 
-function simplify(t) {
-
-	return {id:t.id, title:t.title, album_title:t.album.title, artist_name:t.artist.title, url:t.music_url, art:t.image_url};
+/** Example's function */
+function trace(x) {
+    $('#status').html(x);
 }
 
+/** Example's function */
 function MyUpdate() {
-	$('#played').html("<li>SCORED:" + JSON.stringify(scoredTracks,null,4) + 
-			  "<li>PLAYED:" + JSON.stringify(playedTracks,null,4));
+    var txt = "";
+    if (radioState) { 
+     for(var key in radioState.movement){
+            txt += "<li>movement:" + key + ": <b>" + radioState.movement[key] + "</b></li>";
+    }
+     for(var key in radioState.camera){
+            txt += "<li>camera:" + key + ": <b>" + radioState.camera[key] + "</b></li>";
+    }
 
-	$('#main').html("SENSORS:" + JSON.stringify(radioState,null,4));
+    }
 
+    $('#main').html(
 
+        "<li>pending tracks:<b>" + pendingTracks.length + "</b> <input type=\"button\" value=\"Clear\" onclick=\"MyClearPending();\"></li>" + 
+        "<li>influence tracks:<b>" + influenceTracks.length + "</b></li>" + 
+        "<li>scored tracks:<b>" + scoredTracks.length + "</b></li>" + 
+        "<li>played tracks:<b>" + playedTracks.length + "</b></li>"  + txt
+    );
 }
 
+/** Example's function */
+function MyClearPending() {
+    pendingTracks=[];
+    MyUpdate();
+}
+
+/** This function is called from the native side when the user adds an influence track to the
+ * current radio station.
+ *  @state: current state of the sensors and queue size
+ *  @track: simplified version of the track that the user has selected
+ */
+function OpenRadio_AddTrackInfluence(state, track) {
+    if(state) radioState = state;
+    influenceTracks.push(track);
+
+    MusicCatalog_PushSimilarTracks(pendingTracks, track, function(err) {
+            MyUpdate();
+        });
+}
+
+/** This function is called from the native side when the user scores the current track. 
+ *  @payload: contains the simplified version of the track. {score:number, track:simplifiedTrack}
+ */
 function OpenRadio_UserDidScoreTrack(payload) {
-	scoredTracks.push(payload);
-	MyUpdate();
-}
-function OpenRadio_UserDidPlayTrack(payload) {
-	playedTracks.push(payload);
-	MyUpdate();
+    scoredTracks.push(payload);
+    if (payload.score>0) {
+        console.log("adding tracks");
+        MusicCatalog_PushSimilarTracks(pendingTracks, payload.track, function(err) {
+                        MyUpdate();
+                });
+    }
 }
 
+/** This function is called from the native side when the user plays a track. 
+ *  @track: contains the simplified version of the track
+ */
+function OpenRadio_UserDidPlayTrack(track) {
+    playedTracks.push(track);
+    MyUpdate();
+}
+
+/** This function is called from the native side when the current playing track has fininished buffering.
+ *  @state: contains the queue size and the sensor and camera current state
+ */
 function OpenRadio_GetNextTracks(state) {
-	radioState = state;
-	MyUpdate();
-var qs = 1;
-if (state.queueSize==0) qs = 2;
+    if (state.queueSize>4) { trace("too many in the queue"); return; }
 
+    radioState = state;
+    MyUpdate();
+    if (pendingTracks.length>0) {   
+        var first = pendingTracks.shift();
+        OpenRadio_EnqueueTracks([first], false);
+        trace("Using pending Tracks");
+        
+    } else {
+        trace("Using Random Tracks");
 
-
-var postData = {
-    "queries": [
-        {
-            "enabled": true,
-            "ref": "ref1",
-            "type": "track",
-            "body": {
-                "size": qs,
-
-                "query": {
-                    "function_score": { "random_score": {}, "query": {
-                    "bool": {
-                        "must": [
-                            {
-                                "term": {
-                                    "analysis.color.top_0": "red"
-                                }
-                            },
-                            {
-                                "term": {
-                                    "analysis.genre_cloud.top": "Jazz"
-                                }
-                            }
-                        ]
-                    }
-                }
-            }
-                }
-            }
-        }
-    ]
-};
-
-
-
-$.ajax({
-  url:"https://openradio.tunehog.com/music-catalog/_search",
-  type:"POST",
-  data:JSON.stringify(postData),
-  contentType:"application/json; charset=utf-8",
-  dataType:"json",
-  success: function(data){
-	var tracks = [];
-	var h = data.results[0].hits;
-	for(var i=0;i<h.length;i++) {
-		tracks.push(simplify(h[i]));
-	}
-        var ans = { status : 'success',  tracks: tracks};                                                                                                           
-	if (window.webkit) {
-        window.webkit.messageHandlers.buttonClicked.postMessage(ans);  
-	} else { console.log(JSON.stringify(ans)); }
-  }
-})
-
-    
+        var qs = 1;                                                                                                                                    
+        if (radioState.queueSize==0) qs = 2; 
+        MusicCatalog_FindTracks(qs, [ { "term": { "analysis.color.top_0": "red" } }, { "term": { "analysis.genre_cloud.top": "Jazz" } } ],
+                        function(err,tracks) {
+            if(!err) OpenRadio_EnqueueTracks(tracks, false);
+        });
+    }
 }
 
-///getNextTrack();
 </script>
 <body>
-<h1><div id="played"></div> </h1>
-<h1><div id="main">TEXTO ORIGINAL</div> </h1>
+<h1>Status:<div id="status"></div> </h1>
+<h1><div id="main">Waiting...</div> </h1>
 </body>
 </html>
+
