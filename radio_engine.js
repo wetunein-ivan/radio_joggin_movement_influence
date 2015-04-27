@@ -1,9 +1,9 @@
 {
-  "name":"Jazz 911",
+  "name":"Jazz POC",
   "version":"1.2.3",
   "categories":["Jazz","@Sports"],
   "tags":["Jazz","Weather"],
-  "description" : "This is a first example of the radio engine V1. It randomly shows music based on current weather temperature.",
+  "description" : "It starts with random jazz tracks of RED mood but when you press the LIKE button it will generate a radio station for this track.",
   "developer" :
     {
       "name":"JSM",
