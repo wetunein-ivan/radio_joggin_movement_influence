@@ -3,78 +3,24 @@
 <script type="text/javascript" src="https://openradio.tunehog.com/apps/openradio.js"></script>
 <script>
 
-var pendingTracks = [];
-var influenceTracks = [];
-var playedTracks = [];
-var scoredTracks = [];
-var radioState = {};
-
-/** Example's function */
-function trace(x) {
-    $('#status').html(x);
-}
-
-/** Example's function */
-function MyUpdate() {
-    var txt = "";
-    if (radioState) { 
-     for(var key in radioState.movement){
-            txt += "<li>movement:" + key + ": <b>" + radioState.movement[key] + "</b></li>";
-    }
-     for(var key in radioState.camera){
-            txt += "<li>camera:" + key + ": <b>" + radioState.camera[key] + "</b></li>";
-    }
-
-    }
-
-    $('#main').html(
-
-        "<li>pending tracks:<b>" + pendingTracks.length + "</b> <input type=\"button\" value=\"Clear\" onclick=\"MyClearPending();\"></li>" + 
-        "<li>influence tracks:<b>" + influenceTracks.length + "</b></li>" + 
-        "<li>scored tracks:<b>" + scoredTracks.length + "</b></li>" + 
-        "<li>played tracks:<b>" + playedTracks.length + "</b></li>"  + txt
-    );
-}
-
-/** Example's function */
-function MyClearPending() {
-    pendingTracks=[];
-    MyUpdate();
-}
-
 /** This function is called from the native side when the user adds an influence track to the
  * current radio station.
  *  @state: current state of the sensors and queue size
  *  @track: simplified version of the track that the user has selected
  */
 function OpenRadio_AddTrackInfluence(state, track) {
-    if(state) radioState = state;
-    influenceTracks.push(track);
-
-    MusicCatalog_PushSimilarTracks(pendingTracks, track, function(err) {
-            MyUpdate();
-        });
 }
 
 /** This function is called from the native side when the user scores the current track. 
  *  @payload: contains the simplified version of the track. {score:number, track:simplifiedTrack}
  */
 function OpenRadio_UserDidScoreTrack(payload) {
-    scoredTracks.push(payload);
-    if (payload.score>0) {
-        console.log("adding tracks");
-        MusicCatalog_PushSimilarTracks(pendingTracks, payload.track, function(err) {
-                        MyUpdate();
-                });
-    }
 }
 
 /** This function is called from the native side when the user plays a track. 
  *  @track: contains the simplified version of the track
  */
 function OpenRadio_UserDidPlayTrack(track) {
-    playedTracks.push(track);
-    MyUpdate();
 }
 
 /** This function is called from the native side when the current playing track has fininished buffering.
@@ -82,30 +28,19 @@ function OpenRadio_UserDidPlayTrack(track) {
  */
 function OpenRadio_GetNextTracks(state) {
     if (state.queueSize>4) { trace("too many in the queue"); return; }
-
-    radioState = state;
-    MyUpdate();
-    if (pendingTracks.length>0) {   
-        var first = pendingTracks.shift();
-        OpenRadio_EnqueueTracks([first], false);
-        trace("Using pending Tracks");
-        
-    } else {
-        trace("Using Random Tracks");
-
-        var qs = 1;                                                                                                                                    
-        if (radioState.queueSize==0) qs = 2; 
-        MusicCatalog_FindTracks(qs, [ { "term": { "analysis.color.top_0": "red" } }, { "term": { "analysis.genre_cloud.top": "Jazz" } } ],
-                        function(err,tracks) {
-            if(!err) OpenRadio_EnqueueTracks(tracks, false);
-        });
-    }
+    
+    $("#main").html(JSON.stringify(state));
+    
+    MusicCatalog_FindTracks(2, [ { "term": { "analysis.color.top_0": "red" } }, { "term": { "analysis.genre_cloud.top": "Jazz" } } ],
+            function(err,tracks) {
+        if(!err) OpenRadio_EnqueueTracks(tracks, false);
+    });
 }
 
 </script>
 <body>
 <h1>Status:<div id="status"></div> </h1>
-<h1><div id="main">Waiting...</div> </h1>
+<h1><div id="main">Ivan electronica...</div> </h1>
 </body>
 </html>
 
