@@ -31,7 +31,7 @@ function OpenRadio_GetNextTracks(state) {
     
     $("#main").html(JSON.stringify(state));
     
-    MusicCatalog_FindTracks(2, [ { "term": { "analysis.color.top_0": "red" } }, { "term": { "analysis.genre_cloud.top": "Jazz" } } ],
+    MusicCatalog_FindTracks(2, [ { "term": { "analysis.music_styles.top_0": "house" } } ],
             function(err,tracks) {
         if(!err) OpenRadio_EnqueueTracks(tracks, false);
     });
