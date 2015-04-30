@@ -81,6 +81,20 @@ function OpenRadio_GetNextTracks(state) {
     }
     
     
+    var min;
+    var selectedColor;
+    
+    for(int i =0 ; i< 9 ; i++) {
+        
+        if (min == 0) {
+            min = color_value_diff_abs[i];
+            selectedColor = color[i];
+        } else if (color_value_diff_abs[i]<min) {
+            min = color_value_diff_abs[i];
+            selectedColor = color[i];
+        }
+    }
+    
     
     
 /*
@@ -108,7 +122,7 @@ white 255 , 255 , 255
     
     
     
-    MusicCatalog_FindTracks(2, [ { "term": { "analysis.music_styles.top_0": "house" } } ],
+    MusicCatalog_FindTracks(2, [ { "term": { "analysis.music_styles.top_0": selectedColor } } ],
             function(err,tracks) {
         if(!err) OpenRadio_EnqueueTracks(tracks, false);
     });
