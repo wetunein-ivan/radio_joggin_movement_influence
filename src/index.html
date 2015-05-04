@@ -3,6 +3,7 @@
 <script type="text/javascript" src="https://openradio.tunehog.com/apps/openradio.js"></script>
 <script>
 
+var radioState = {};
 /** This function is called from the native side when the user adds an influence track to the
  * current radio station.
  *  @state: current state of the sensors and queue size
@@ -29,6 +30,7 @@ function OpenRadio_UserDidPlayTrack(track) {
 function OpenRadio_GetNextTracks(state) {
     if (state.queueSize>4) { trace("too many in the queue"); return; }
     
+    radioState = state;
     
     var color = [9];
     var color_R = [9];
