@@ -84,15 +84,12 @@ function OpenRadio_GetNextTracks(state) {
     }
     
     
-    var min;
-    var selectedColor;
+    var min = -1;
+    var selectedColor = 'red';
     
     for(var i =0 ; i< 9 ; i++) {
         
-        if (min == 0) {
-            min = color_value_diff_abs[i];
-            selectedColor = color[i];
-        } else if (color_value_diff_abs[i]<min) {
+        if (color_value_diff_abs[i]<min || min<0) {
             min = color_value_diff_abs[i];
             selectedColor = color[i];
         }
@@ -121,7 +118,7 @@ red 255 , 0 , 0
 white 255 , 255 , 255    
     */
     
-    //$("#main").html(JSON.stringify(state));
+    $("#main").html(selectedColor);
     
     
  MusicCatalog_FindTracks(2, [ { "term": { "analysis.color.top_0": selectedColor } } ],
