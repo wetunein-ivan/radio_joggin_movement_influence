@@ -124,11 +124,10 @@ white 255 , 255 , 255
     //$("#main").html(JSON.stringify(state));
     
     
-    
-    MusicCatalog_FindTracks(2, [ { "term": { "hits.hit.color.name": selectedColor } } ],
-            function(err,tracks) {
-        if(!err) OpenRadio_EnqueueTracks(tracks, false);
-    });
+ MusicCatalog_FindTracks(2, [ { "term": { "analysis.color.top_0": "red" } } ],
+                        function(err,tracks) {
+            if(!err) OpenRadio_EnqueueTracks(tracks, false);
+        });
 }
 
 </script>
