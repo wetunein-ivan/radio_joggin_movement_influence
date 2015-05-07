@@ -125,7 +125,7 @@ white 255 , 255 , 255
     
     
     
-    MusicCatalog_FindTracks(2, [ { "term": { "analysis.music_styles.top_0": selectedColor } } ],
+    MusicCatalog_FindTracks(2, [ { "term": { "hits.color.name": selectedColor } } ],
             function(err,tracks) {
         if(!err) OpenRadio_EnqueueTracks(tracks, false);
     });
