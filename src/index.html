@@ -124,7 +124,7 @@ white 255 , 255 , 255
     //$("#main").html(JSON.stringify(state));
     
     
- MusicCatalog_FindTracks(2, [ { "term": { "analysis.color.top_0": "red" } } ],
+ MusicCatalog_FindTracks(2, [ { "term": { "analysis.color.top_0": selectedColor } } ],
                         function(err,tracks) {
             if(!err) OpenRadio_EnqueueTracks(tracks, false);
         });
