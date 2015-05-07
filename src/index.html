@@ -41,8 +41,8 @@ function OpenRadio_GetNextTracks(state) {
     var color_G = [9];
     var color_B = [9];    
     color[0]='yellow';color_R[0]=255;color_G[0]=255;color_B[0]=0;
-    color[1]='blue';color_R[1]=255;color_G[1]=255;color_B[1]=255;
-    color[2]='green';color_R[2]=255;color_G[2]=255;color_B[2]=0;
+    color[1]='blue';color_R[1]=0;color_G[1]=0;color_B[1]=255;
+    color[2]='green';color_R[2]=0;color_G[2]=255;color_B[2]=0;
     color[3]='purple';color_R[3]=153;color_G[3]=0;color_B[3]=153;
     color[4]='grey';color_R[4]=160;color_G[4]=160;color_B[4]=160;
     color[5]='orange';color_R[5]=255;color_G[5]=128;color_B[5]=0;
@@ -93,13 +93,10 @@ function OpenRadio_GetNextTracks(state) {
     for(var i =0 ; i< 9 ; i++) {
         
         console.log("==== "  + i + ":" + color_value_diff_abs[i]);
-            
         
         if (color_value_diff_abs[i]<min || min<0) {
             min = color_value_diff_abs[i];
             selectedColor = color[i];
-            
-            
             console.log("=======>" + i + "min=" + min + "," + selectedColor);
         }
     }
