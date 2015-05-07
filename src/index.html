@@ -33,6 +33,9 @@ function OpenRadio_GetNextTracks(state) {
     radioState = state;
     //radioState = state;
     
+    
+    console.log(JSON.stringify(state));
+    
     var color = [9];
     var color_R = [9];
     var color_G = [9];
@@ -64,17 +67,17 @@ function OpenRadio_GetNextTracks(state) {
         
         min_dif_abs = 765;
         
-        min_dif_abs_tmp = Math.abs(color_R[i] - radioState.movement["back_red"]) + 
-                      Math.abs(color_G[i] - radioState.movement["back_green"]) +
-                      Math.abs(color_B[i] - radioState.movement["back_blue"]);
+        min_dif_abs_tmp = Math.abs(color_R[i] - radioState.camera["back_red"]) + 
+                      Math.abs(color_G[i] - radioState.camera["back_green"]) +
+                      Math.abs(color_B[i] - radioState.camera["back_blue"]);
                       
           if (min_dif_abs_tmp<min_dif_abs) {
               min_dif_abs = min_dif_abs_tmp;
           }          
 
-      min_dif_abs_tmp = Math.abs(color_R[i] - radioState.movement["front_red"]) + 
-                        Math.abs(color_G[i] - radioState.movement["front_green"]) +
-                        Math.abs(color_B[i] - radioState.movement["front_blue"]);
+      min_dif_abs_tmp = Math.abs(color_R[i] - radioState.camera["front_red"]) + 
+                        Math.abs(color_G[i] - radioState.camera["front_green"]) +
+                        Math.abs(color_B[i] - radioState.camera["front_blue"]);
                         
           if (min_dif_abs_tmp<min_dif_abs) {
               min_dif_abs = min_dif_abs_tmp;
@@ -89,9 +92,15 @@ function OpenRadio_GetNextTracks(state) {
     
     for(var i =0 ; i< 9 ; i++) {
         
+        console.log("==== "  + i + ":" + color_value_diff_abs[i]);
+            
+        
         if (color_value_diff_abs[i]<min || min<0) {
             min = color_value_diff_abs[i];
             selectedColor = color[i];
+            
+            
+            console.log("=======>" + i + "min=" + min + "," + selectedColor);
         }
     }
     
