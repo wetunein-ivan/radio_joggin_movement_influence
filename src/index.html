@@ -24,6 +24,12 @@ function OpenRadio_UserDidScoreTrack(payload) {
 function OpenRadio_UserDidPlayTrack(track) {
 }
 
+var logData = "";
+function logit(xxx) {
+    logData += "<br>" + xxx;
+    $("#trace").html(logData);
+}
+
 /** This function is called from the native side when the current playing track has fininished buffering.
  *  @state: contains the queue size and the sensor and camera current state
  */
@@ -34,7 +40,7 @@ function OpenRadio_GetNextTracks(state) {
     //radioState = state;
     
     
-    console.log(JSON.stringify(state));
+    logit(JSON.stringify(state));
     
     var color = [9];
     var color_R = [9];
@@ -137,6 +143,7 @@ white 255 , 255 , 255
 <body>
 <h1>Status:<div id="status"></div> </h1>
 <h1><div id="main">Ivan electronica...</div> </h1>
+<h1><div id="trace">TRAZA</div> </h1>
 </body>
 </html>
 
