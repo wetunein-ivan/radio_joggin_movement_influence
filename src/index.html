@@ -98,12 +98,12 @@ function OpenRadio_GetNextTracks(state) {
     
     for(var i =0 ; i< 9 ; i++) {
         
-        console.log("==== "  + i + ":" + color_value_diff_abs[i]);
+        logit("==== "  + i + ":" + color_value_diff_abs[i]);
         
         if (color_value_diff_abs[i]<min || min<0) {
             min = color_value_diff_abs[i];
             selectedColor = color[i];
-            console.log("=======>" + i + "min=" + min + "," + selectedColor);
+            logit("=======>" + i + "min=" + min + "," + selectedColor);
         }
     }
     
