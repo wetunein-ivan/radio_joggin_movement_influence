@@ -133,7 +133,7 @@ white 255 , 255 , 255
     $("#main").html(selectedColor);
     
     
- MusicCatalog_FindTracks(2, [ { "term": { "analysis.color.top_0": selectedColor } } , { "term": { "analysis.genre_cloud.top": "Jazz" } }],
+ MusicCatalog_FindTracks(2, [ { "term": { "analysis.color.top_0": selectedColor } } , { "term": { "analysis.genre_cloud.top": "Pop" } }],
                         function(err,tracks) {
             if(!err) OpenRadio_EnqueueTracks(tracks, false);
         });
