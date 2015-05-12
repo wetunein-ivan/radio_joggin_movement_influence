@@ -37,8 +37,9 @@ function OpenRadio_GetNextTracks(state) {
     if (state.queueSize>4) { trace("too many in the queue"); return; }
     
     radioState = state;
-    //radioState = state;
     
+
+    var genreSelected = "Pop";    
     
     logit(JSON.stringify(state));
     
@@ -133,7 +134,7 @@ white 255 , 255 , 255
     $("#main").html(selectedColor);
     
     
- MusicCatalog_FindTracks(2, [ { "term": { "analysis.color.top_0": selectedColor } } , { "term": { "analysis.genre_cloud.top": "Pop" } }],
+ MusicCatalog_FindTracks(2, [ { "term": { "analysis.color.top_0": selectedColor } } , { "term": { "analysis.genre_cloud.top": genreSelected } }],
                         function(err,tracks) {
             if(!err) OpenRadio_EnqueueTracks(tracks, false);
         });
