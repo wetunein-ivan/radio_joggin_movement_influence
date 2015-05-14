@@ -4,12 +4,36 @@
 <script>
 
 var radioState = {};
+
+var last_acc_pos= 0;
+var influenceTracks = [];
+var pendingTracks = [];
+
 /** This function is called from the native side when the user adds an influence track to the
  * current radio station.
  *  @state: current state of the sensors and queue size
  *  @track: simplified version of the track that the user has selected
  */
+ 
+ 
+function MyUpdate() {
+    var txt = "";
+    if (radioState) {
+            txt += "<li>movement acc_pos: <b>" + radioState.movement["acc_pos"] + "</b></li>";
+    }
+    $('#main').html(
+        "<li>last movement value:<b>" + last_acc_pos + "</b></li>" + txt
+    );
+} 
+ 
 function OpenRadio_AddTrackInfluence(state, track) {
+    
+    if(state) radioState = state;
+    influenceTracks.push(track);
+    MusicCatalog_PushSimilarTracks(pendingTracks, track, function(err) {
+            MyUpdate();
+        });
+    
 }
 
 /** This function is called from the native side when the user scores the current track. 
@@ -38,103 +62,29 @@ function OpenRadio_GetNextTracks(state) {
     
     radioState = state;
     
-
-    var genreSelected = "Pop";    
+      MyUpdate();
     
     logit(JSON.stringify(state));
     
-    var color = [9];
-    var color_R = [9];
-    var color_G = [9];
-    var color_B = [9];    
-    color[0]='yellow';color_R[0]=255;color_G[0]=255;color_B[0]=0;
-    color[1]='blue';color_R[1]=0;color_G[1]=0;color_B[1]=255;
-    color[2]='green';color_R[2]=0;color_G[2]=255;color_B[2]=0;
-    color[3]='purple';color_R[3]=153;color_G[3]=0;color_B[3]=153;
-    color[4]='grey';color_R[4]=160;color_G[4]=160;color_B[4]=160;
-    color[5]='orange';color_R[5]=255;color_G[5]=128;color_B[5]=0;
-    color[6]='black';color_R[6]=0;color_G[6]=0;color_B[6]=0;
-    color[7]='red';color_R[7]=255;color_G[7]=0;color_B[7]=0;
-    color[8]='white';color_R[8]=255;color_G[8]=255;color_B[8]=255;
+    var current_acc_pos = radioState.movement["acc_pos"];
     
-    var color_value_diff_abs = [9];
-    for (var i=0;i<9;i++){
-        color_value_diff_abs[i]=0;
+    dif_abs = Math.abs(last_acc_pos - current_acc_pos);
+        
+    last_acc_pos = current_acc_pos;
+    
+    if ((0<dif_abs) && (dif_abs<=2)) {
+        energy = 2;    
+    } else if ((2<dif_abs) && (dif_abs<5)) {
+       energy = 5;      
+    } else if (dif_abs>=5) {
+        energy = 8;      
     }
-    // Math.abs(number);
-    
-    var color_target='white';
-    
-    var dif_abs = 0;
-    var min_dif_abs = 0;
-    
-    var color_select = 0;
-    
-    for(var i =0 ; i< 9 ; i++) {
-        
-        min_dif_abs = 765;
-        
-        min_dif_abs_tmp = Math.abs(color_R[i] - radioState.camera["back_red"]) + 
-                      Math.abs(color_G[i] - radioState.camera["back_green"]) +
-                      Math.abs(color_B[i] - radioState.camera["back_blue"]);
-                      
-          if (min_dif_abs_tmp<min_dif_abs) {
-              min_dif_abs = min_dif_abs_tmp;
-          }          
 
-      min_dif_abs_tmp = Math.abs(color_R[i] - radioState.camera["front_red"]) + 
-                        Math.abs(color_G[i] - radioState.camera["front_green"]) +
-                        Math.abs(color_B[i] - radioState.camera["front_blue"]);
-                        
-          if (min_dif_abs_tmp<min_dif_abs) {
-              min_dif_abs = min_dif_abs_tmp;
-          }                           
-                      
-        color_value_diff_abs[i] = min_dif_abs;
-    }
     
     
-    var min = -1;
-    var selectedColor = 'red';
+     //$("#main").html("<li>last movement value:<b>" + last_acc_pos + "</b></li>");
     
-    for(var i =0 ; i< 9 ; i++) {
-        
-        logit("==== "  + i + ":" + color_value_diff_abs[i]);
-        
-        if (color_value_diff_abs[i]<min || min<0) {
-            min = color_value_diff_abs[i];
-            selectedColor = color[i];
-            logit("=======>" + i + "min=" + min + "," + selectedColor);
-        }
-    }
-    
-    
-    
-/*
-camera:back_red: 0
-camera:back_blue: 0
-camera:front_green: 9.02353572845459
-camera:back_green: 0
-camera:front_blue: 11.38513088226318
-camera:front_red: 10.3380184173584
-*/
-    
-    /*
-yellow 255 , 255 ,0
-blue   0 , 0 , 255
-green 0 , 255 , 0
-purple 153 , 0 , 153
-grey 160 , 160 , 160
-orange 255 , 128 , 0
-black  0 , 0 , 0
-red 255 , 0 , 0
-white 255 , 255 , 255    
-    */
-    //
-    $("#main").html(selectedColor);
-    
-    
- MusicCatalog_FindTracks(2, [ { "term": { "analysis.color.top_0": selectedColor } } , { "term": { "analysis.genre_cloud.top": genreSelected } }],
+ MusicCatalog_FindTracks(2, [ {"range" : {"analysis.energy" : {"gt" : energy-2, "lt":energy+2}}} ],
                         function(err,tracks) {
             if(!err) OpenRadio_EnqueueTracks(tracks, false);
         });
