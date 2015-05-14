@@ -1,12 +1,12 @@
 {
-  "name":"Driving Electronic Mix",
+  "name":"Joggin Movement Influence",
   "version":"1.2.3",
-  "categories":["Electronica","@Sports"],
-  "tags":["Electronica","Car","Speed"],
-  "description" : "Random Electronics Tracks that vary the mood depending on car speed.",
+  "categories":["All","@Sports"],
+  "tags":["Joggin","Movement","Energy"],
+  "description" : "Select music when you make joggin.",
   "developer" :
     {
-      "name":"JSM",
+      "name":"ISG",
       "company":"RR Music"
     }
 }
